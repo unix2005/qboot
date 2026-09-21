@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="user">
+
+    <sql id="Cols">
+        id, user_name, age, balance, status, created_at
+    </sql>
+
+    <select id="getById">
+        SELECT <include refid="Cols"/>
+        FROM t_user
+        WHERE id = #{id}
+    </select>
+
+    <select id="search">
+        SELECT <include refid="Cols"/>
+        FROM t_user
+        <where>
+            <if test="name != null and name != ''">AND user_name LIKE #{name}</if>
+            <if test="minAge != null">AND age &gt;= #{minAge}</if>
+            <if test="statusList != null">
+                AND status IN
+                <foreach collection="statusList" item="st" open="(" close=")" separator=",">
+                    #{st}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <insert id="add">
+        INSERT INTO t_user (user_name, age, balance, status)
+        VALUES (#{name}, #{age}, #{balance}, #{status})
+    </insert>
+
+    <update id="updateSelective">
+        UPDATE t_user
+        <set>
+            <if test="name != null">user_name = #{name},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="balance != null">balance = #{balance},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="remove">
+        DELETE FROM t_user WHERE id = #{id}
+    </delete>
+
+</mapper>

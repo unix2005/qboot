@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 样例 mapper：覆盖 if / choose-when-otherwise / where / set / foreach / sql+include -->
+<mapper namespace="user">
+
+    <sql id="Base_Column_List">
+        id, user_name, age, balance, status, created_at
+    </sql>
+
+    <select id="selectById">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_user
+        WHERE id = #{id}
+    </select>
+
+    <select id="search">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_user
+        <where>
+            <if test="name != null and name != ''">AND user_name LIKE #{name}</if>
+            <if test="minAge != null">AND age &gt;= #{minAge}</if>
+            <if test="statusList != null">
+                AND status IN
+                <foreach collection="statusList" item="st" open="(" close=")" separator=",">
+                    #{st}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY ${orderBy}
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="chooseOne">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_user
+        <where>
+            <choose>
+                <when test="id != null">AND id = #{id}</when>
+                <when test="name != null">AND user_name = #{name}</when>
+                <otherwise>AND status = 1</otherwise>
+            </choose>
+        </where>
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_user (user_name, age, balance, status)
+        VALUES (#{name}, #{age}, #{balance}, #{status})
+    </insert>
+
+    <update id="updateSelective">
+        UPDATE t_user
+        <set>
+            <if test="name != null">user_name = #{name},</if>
+            <if test="age != null">age = #{age},</if>
+            <if test="balance != null">balance = #{balance},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM t_user WHERE id = #{id}
+    </delete>
+
+    <delete id="batchDelete">
+        DELETE FROM t_user WHERE id IN
+        <foreach collection="ids" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

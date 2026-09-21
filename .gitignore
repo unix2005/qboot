@@ -1,0 +1,34 @@
+# 构建产物
+build/
+build-asan/
+build-tsan/
+cmake-build-*/
+out/
+
+# 日志运行产物（目录结构保留，内容不入库）
+logs/*
+!logs/.gitkeep
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+
+# 编译中间产物
+*.o
+*.a
+*.so
+*.dylib
+
+# 编辑器 / 系统
+.DS_Store
+*.swp
+*~
+.idea/
+.vscode/
+
+# 本机临时文件
+*.log
+/tmp/
