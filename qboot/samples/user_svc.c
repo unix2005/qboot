@@ -51,6 +51,11 @@ static app_t g_app;
 
 /* ---------------- 响应辅助 ---------------- */
 
+/*
+ * 注意所有权：json_object_set_new 会"接管"这个引用，
+ * 所以调用 json_ok 之后不能再 json_decref(data)，否则就是 use-after-free。
+ * 想继续用就先 json_incref（参考 h_get_user）。
+ */
 static int json_ok(q_resp_t *resp, json_t *data)
 {
     json_t *wrap = json_object();
@@ -122,9 +127,8 @@ static int h_search(q_req_t *req, q_resp_t *resp, void *ud)
     }
     json_decref(p);
 
-    int rc = json_ok(resp, rows);
-    json_decref(rows);
-    return rc;
+    /* rows 的所有权已经交给 json_ok 了，这里不能再 decref */
+    return json_ok(resp, rows);
 }
 
 static int h_add(q_req_t *req, q_resp_t *resp, void *ud)
@@ -246,6 +250,23 @@ int main(int argc, char **argv)
         return 1;
     }
     q_info("db pool ready: %s", dburl);
+
+    /*
+     * mock 驱动不解析 SQL，返回的就是这里塞进去的固定结果集。
+     * 接真库后删掉这段即可（也可以留着，真库路径不会用到它）。
+     */
+    if (strncmp(dburl, "mock://", 7) == 0) {
+        static const char *cols[] = { "id", "user_name", "age", "balance",
+                                      "status", "created_at" };
+        static qmock_cell_t cells[] = {
+            QMOCK_INT(1), QMOCK_STR("zhangsan"), QMOCK_INT(20), QMOCK_DOUBLE(100.5),
+            QMOCK_INT(1), QMOCK_STR("2026-09-22 09:00:00"),
+
+            QMOCK_INT(2), QMOCK_STR("lisi"),     QMOCK_INT(25), QMOCK_DOUBLE(200.0),
+            QMOCK_INT(1), QMOCK_STR("2026-09-22 09:10:00"),
+        };
+        qmock_expect(cols, 6, cells, 2);
+    }
 
     /* ---- mapper ---- */
     const char *mpdir = q_conf_get(cf, "mapper", "dir", "samples/mapper");

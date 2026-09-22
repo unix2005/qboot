@@ -32,3 +32,14 @@ Makefile
 # 本机临时文件
 *.log
 /tmp/
+
+# 样例/模板里编译出来的二进制与 dSYM
+minimal_svc
+minimal_svc_shared
+*.dSYM/
+
+# 样例/模板里编译出来的二进制与 dSYM
+minimal_svc
+minimal_svc_shared
+*.dSYM/
+!qboot/templates/**/Makefile

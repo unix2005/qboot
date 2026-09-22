@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mapper namespace="order">
+
+    <sql id="Cols">
+        id, user_id, item, amount, status, created_at
+    </sql>
+
+    <select id="getById">
+        SELECT <include refid="Cols"/>
+        FROM t_order
+        WHERE id = #{id}
+    </select>
+
+    <select id="listByUser">
+        SELECT <include refid="Cols"/>
+        FROM t_order
+        <where>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="statusList != null">
+                AND status IN
+                <foreach collection="statusList" item="st" open="(" close=")" separator=",">
+                    #{st}
+                </foreach>
+            </if>
+        </where>
+        ORDER BY id DESC
+        LIMIT #{offset}, #{size}
+    </select>
+
+    <select id="countByUser">
+        SELECT COUNT(*) AS cnt
+        FROM t_order
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="add">
+        INSERT INTO t_order (user_id, item, amount, status)
+        VALUES (#{userId}, #{item}, #{amount}, #{status})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE t_order
+        SET status = #{status}
+        <if test="payTime != null">, pay_time = #{payTime}</if>
+        WHERE id = #{id} AND status = #{oldStatus}
+    </update>
+
+    <delete id="remove">
+        DELETE FROM t_order WHERE id = #{id} AND status = 0
+    </delete>
+
+</mapper>

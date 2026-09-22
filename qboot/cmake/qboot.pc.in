@@ -1,0 +1,15 @@
+# ${pcfiledir} 让 .pc 文件跟着实际安装位置走，
+# 用 cmake --install --prefix=xxx 换目录时不会失效。
+prefix=${pcfiledir}/../..
+exec_prefix=${prefix}
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: qboot
+Description: qboot - C 微服务框架（HTTP / DB / XML mapper / Consul 注册发现）
+Version: @PROJECT_VERSION@
+URL: https://github.com/unix2005/qboot
+Requires:
+Libs: -L${libdir} @QBOOT_PC_LIBS@
+Libs.private: @QBOOT_PC_PRIVATE_LIBS@
+Cflags: -I${includedir}
