@@ -188,6 +188,15 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/deploy/
         DESTINATION share/qboot/deploy
         FILES_MATCHING PATTERN "*.conf")
 
+# 服务模板 + demo 建表 SQL 也一起装，方便在新机器上 cp -r 出来就能改
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/templates/
+        DESTINATION share/qboot/templates
+        FILES_MATCHING
+            PATTERN "*.c" PATTERN "*.h" PATTERN "*.ini" PATTERN "Makefile" PATTERN "*.txt")
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/sql/
+        DESTINATION share/qboot/sql
+        FILES_MATCHING PATTERN "*.sql")
+
 # ---------------- 生成 pkg-config / CMake config 需要的库清单 ----------------
 
 # 只列真正构建出来的库，顺序是"依赖者在前、被依赖者在后"
